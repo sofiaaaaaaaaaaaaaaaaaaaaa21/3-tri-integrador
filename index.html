@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SolarSense | Monitoramento de Luz</title>
+<style>
+:root{--bg:#08111f;--panel:#111f33;--panel2:#172943;--text:#edf5ff;--muted:#9db0c9;--cyan:#43d9e8;--yellow:#ffd166;--green:#55df9a;--red:#ff6878}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 80% 0%,#183653 0,transparent 35%),var(--bg);color:var(--text);font:15px/1.6 Arial,sans-serif}
+header{padding:28px 7%;border-bottom:1px solid #243750;display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+.brand{font-size:22px;font-weight:800;letter-spacing:1px}.brand span{color:var(--cyan)}
+header small{color:var(--muted)}main{max-width:1100px;margin:auto;padding:30px 20px 60px}
+h1{font-size:clamp(27px,4vw,42px);line-height:1.15;margin:10px 0}h2{font-size:21px;margin:0 0 15px}
+.intro{color:var(--muted);max-width:720px;margin-bottom:25px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.card{background:linear-gradient(145deg,var(--panel),#0e1a2b);border:1px solid #263b57;border-radius:18px;padding:22px;box-shadow:0 12px 30px #0002}
+.wide{grid-column:1/-1}.muted{color:var(--muted)}.value{font-size:42px;font-weight:800;letter-spacing:-1px}.unit{font-size:16px;color:var(--muted)}
+.led-row{display:flex;gap:22px;align-items:center;flex-wrap:wrap;margin:15px 0}
+.led-wrap{display:flex;align-items:center;gap:9px;color:var(--muted);font-size:13px}
+.led{width:19px;height:19px;border-radius:50%;background:#34445b;border:2px solid #52647a;box-shadow:inset 0 0 5px #0008}
+.led.on.green{background:var(--green);box-shadow:0 0 15px #55df9a}.led.on.yellow{background:var(--yellow);box-shadow:0 0 15px #ffd166}.led.on.red{background:var(--red);box-shadow:0 0 15px #ff6878}
+.meter{height:18px;background:#263850;border-radius:20px;overflow:hidden;margin:14px 0 8px}
+.fill{height:100%;width:0;background:linear-gradient(90deg,var(--red),var(--yellow),var(--green));border-radius:20px;transition:width .25s}
+input[type=range]{width:100%;accent-color:var(--cyan);cursor:pointer;margin:15px 0}
+.status{display:inline-block;padding:5px 12px;border-radius:20px;background:#243750;color:var(--cyan);font-weight:700;font-size:13px}
+button{background:var(--cyan);color:#06131d;border:0;border-radius:10px;padding:11px 16px;font-weight:700;cursor:pointer;margin:5px 5px 5px 0}
+button.secondary{background:#263c58;color:var(--text);border:1px solid #405979}
+button:hover{filter:brightness(1.1)}.note{font-size:13px;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:15px}
+.stat{background:#172943;border-radius:12px;padding:12px}.stat b{display:block;font-size:19px}
+.qa{padding:15px 0;border-bottom:1px solid #2b405b}.qa:last-child{border:0}.qa h3{font-size:16px;margin:0 0 6px;color:var(--cyan)}.qa p{margin:0;color:#d0dced}
+footer{text-align:center;padding:25px;color:var(--muted);border-top:1px solid #243750}
+@media(max-width:700px){.grid{grid-template-columns:1fr}.wide{grid-column:auto}.stats{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="brand">☀ SOLAR<span>SENSE</span></div><small>PAINEL DE MONITORAMENTO DE LUMINOSIDADE</small></header>
+<main>
+<p class="status">PROJETO 07 · CIÊNCIAS / TECNOLOGIA</p>
+<h1>Monitoramento da <span style="color:var(--cyan)">radiação solar</span></h1>
+<p class="intro">Observe como a intensidade da luz muda os indicadores do sistema. Ajuste o controle abaixo para simular a leitura de um sensor LDR e acompanhar a iluminação do ambiente.</p>
+
+<div class="grid">
+<section class="card">
+<h2>☀ Intensidade luminosa</h2>
+<div class="value"><span id="percent">50</span><span class="unit"> %</span></div>
+<div class="meter"><div class="fill" id="bar"></div></div>
+<div class="muted" style="display:flex;justify-content:space-between"><span>0% · Escuro</span><span>100% · Muito claro</span></div>
+<input id="light" type="range" min="0" max="100" value="50" aria-label="Ajustar intensidade da luz">
+<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">
+<button class="secondary" id="less">− Diminuir luz</button><button id="more">+ Aumentar luz</button>
+</div>
+<p class="note">Simulação didática: mova o controle para representar a luz captada pelo sensor.</p>
+</section>
+
+<section class="card">
+<h2>💡 LEDs indicadores</h2>
+<p class="muted">Os LEDs acendem de acordo com a faixa de luminosidade simulada.</p>
+<div class="led-row">
+<div class="led-wrap"><span class="led" id="ledRed"></span> Baixa luz</div>
+<div class="led-wrap"><span class="led" id="ledYellow"></span> Luz média</div>
+<div class="led-wrap"><span class="led" id="ledGreen"></span> Luz alta</div>
+</div>
+<div class="status" id="condition">Iluminação moderada</div>
+<p id="explain" class="muted">A luz está em uma faixa intermediária.</p>
+<div class="stats">
+<div class="stat"><span class="note">Faixa</span><b id="range">Média</b></div>
+<div class="stat"><span class="note">Indicador ativo</span><b id="active">Amarelo</b></div>
+<div class="stat"><span class="note">Leitura</span><b id="reading">50%</b></div>
+</div>
+</section>
+
+<section class="card wide">
+<h2>📈 Comparação de posições</h2>
+<p class="muted">Uma forma de descobrir onde um painel solar recebe mais luz é medir em diferentes posições, mantendo o mesmo sensor e as mesmas condições.</p>
+<div class="stats">
+<div class="stat"><span class="note">Posição A · sombra</span><b>20%</b></div>
+<div class="stat"><span class="note">Posição B · parcial</span><b>55%</b></div>
+<div class="stat"><span class="note">Posição C · luz direta</span><b>90%</b></div>
+</div>
+<p class="note">Valores ilustrativos para demonstrar a comparação; não são medições reais do ambiente.</p>
+</section>
+
+<section class="card wide">
+<h2>📚 Questões orientadoras</h2>
+<div class="qa"><h3>1. Como um LDR ou fotodiodo responde à luz?</h3><p>O LDR é um resistor cuja resistência elétrica diminui quando recebe mais luz e aumenta no escuro. O circuito pode transformar essa variação em uma tensão que o Arduino consegue ler. O fotodiodo converte a luz em corrente elétrica; essa corrente varia conforme a luz recebida.</p></div>
+<div class="qa"><h3>2. Como comparar a intensidade luminosa em diferentes posições?</h3><p>Faça leituras com o mesmo sensor em cada posição, mantendo a distância, o ângulo e o tempo de medição semelhantes. Registre os valores e compare-os. Para uma comparação mais confiável, repita as medições e calcule a média.</p></div>
+<div class="qa"><h3>3. É possível identificar o melhor posicionamento de um coletor solar?</h3><p>Sim. É possível comparar a iluminação em diferentes locais e orientações. O melhor posicionamento tende a ser aquele que recebe maior incidência solar ao longo do período de interesse, considerando também sombras e a trajetória do Sol. Uma leitura isolada não garante o melhor resultado durante o dia todo.</p></div>
+<div class="qa"><h3>4. Quais são as limitações desses sensores para medir a energia solar?</h3><p>LDRs e fotodiodos medem a resposta à luz, mas não medem diretamente toda a energia solar recebida. A leitura depende do espectro da luz, do ângulo, da temperatura, da calibração e das características do sensor. Para medir irradiância com precisão, usa-se um instrumento apropriado, como um piranômetro.</p></div>
+</section>
+
+<section class="card wide">
+<h2>🔬 Como funciona o experimento?</h2>
+<p class="muted">O sensor detecta a luz do ambiente. O microcontrolador lê o sinal e pode acionar LEDs conforme limites definidos no programa. Nesta página, o controle simula a leitura para demonstrar o funcionamento.</p>
+<p><b>Componentes sugeridos:</b> Arduino, sensor LDR, resistor adequado, LEDs vermelho/amarelo/verde, resistores para os LEDs e jumpers.</p>
+<p class="note">Importante: esta página funciona como simulação no navegador. Ela não acessa automaticamente o sensor físico nem controla LEDs reais. Para isso, é necessário conectar o Arduino ao computador e usar um programa de comunicação compatível.</p>
+</section>
+</div>
+</main>
+<footer>SolarSense · Projeto 07 — Sensores de luz e acompanhamento da radiação solar</footer>
+<script>
+const slider=document.getElementById('light');
+const percent=document.getElementById('percent'),bar=document.getElementById('bar');
+const leds={red:document.getElementById('ledRed'),yellow:document.getElementById('ledYellow'),green:document.getElementById('ledGreen')};
+function update(){
+ const v=Number(slider.value);
+ percent.textContent=v;bar.style.width=v+'%';
+ Object.values(leds).forEach(l=>l.classList.remove('on','red','yellow','green'));
+ let condition,explain,range,active;
+ if(v<35){leds.red.classList.add('on','red');condition='Pouca iluminação';explain='O ambiente está escuro. Procure uma área mais iluminada.';range='Baixa';active='Vermelho';}
+ else if(v<70){leds.yellow.classList.add('on','yellow');condition='Iluminação moderada';explain='A luz está em uma faixa intermediária.';range='Média';active='Amarelo';}
+ else{leds.green.classList.add('on','green');condition='Boa iluminação';explain='O ambiente está bem iluminado.';range='Alta';active='Verde';}
+ document.getElementById('condition').textContent=condition;
+ document.getElementById('explain').textContent=explain;
+ document.getElementById('range').textContent=range;
+ document.getElementById('active').textContent=active;
+ document.getElementById('reading').textContent=v+'%';
+}
+slider.addEventListener('input',update);
+document.getElementById('less').addEventListener('click',()=>{slider.value=Math.max(0,Number(slider.value)-10);update()});
+document.getElementById('more').addEventListener('click',()=>{slider.value=Math.min(100,Number(slider.value)+10);update()});
+update();
+</script>
+</body>
+</html>
